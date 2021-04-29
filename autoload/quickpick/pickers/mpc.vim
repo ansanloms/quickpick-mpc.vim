@@ -12,22 +12,39 @@ def quickpick#pickers#mpc#open(
   options: dict<any>,
   quickpickOptions: dict<any>,
 ): void
-  call quickpick#open(extend(quickpickOptions, {
-    items: s:get_items(command, subcommands, options),
-  }))
+  var items = GetItems(command, subcommands, options)
+  if match(keys(quickpickOptions), "items") != -1
+    echo quickpickOptions["items"]
+    items = quickpickOptions["items"] + items
+    unlet quickpickOptions["items"]
+  endif
+
+  call quickpick#open(extend(quickpickOptions, { items: items }))
 enddef
 
-export def s:get_items(
+def GetCommand(
+  command: string,
+  subcommands: list<string>,
+  options: dict<any>,
+): string
+  return join([
+    mpc,
+    command,
+    join(values(mapnew(options, (i, v) => "--" .. i .. "=" .. shellescape(i == "format" ? join(values(mapnew(v, (i2, v2) => i2 .. ":" .. v2)), delimiter) : v))), " "),
+    join(subcommands, " "),
+  ], " ")
+enddef
+
+def GetItems(
   command: string,
   subcommands: list<string>,
   options: dict<any>,
 ): list<any>
-  const execute = split(system(join([
-    mpc,
+  const execute = split(system(GetCommand(
     command,
-    join(subcommands, " "),
-    join(values(mapnew(options, (i, v) => "--" .. i .. "=" .. shellescape(i == "format" ? join(values(mapnew(v, (i2, v2) => i2 .. ":" .. v2)), delimiter) : v))), " "),
-  ], " ")), "\n")
+    subcommands,
+    options,
+  )), "\n")
 
   if match(keys(options), "format") != -1
     const result = []

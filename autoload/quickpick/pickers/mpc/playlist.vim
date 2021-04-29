@@ -9,12 +9,17 @@ def quickpick#pickers#mpc#playlist#open(): void
       position: "%position%",
     }
   }, {
-    on_accept: function("s:on_accept"),
+    on_accept: function("s:OnAccept"),
     key: "view",
   })
 enddef
 
-def s:on_accept(data: dict<list<dict<string>>>, name: string): void
+def OnAccept(data: dict<list<dict<string>>>, name: string): void
   call quickpick#close()
-  call system(mpc .. " play " .. shellescape(data["items"][0]["position"]))
+
+  call system(join([
+    mpc,
+    "play",
+    shellescape(data["items"][0]["position"])
+  ], " "))
 enddef

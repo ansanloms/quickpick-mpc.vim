@@ -9,12 +9,17 @@ def quickpick#pickers#mpc#listall#open(): void
       file: "%file%",
     }
   }, {
-    on_accept: function("s:on_accept"),
-    key: "view"
+    on_accept: function("s:OnAccept"),
+    key: "view",
   })
 enddef
 
-def s:on_accept(data: dict<list<dict<string>>>, name: string): void
+def OnAccept(data: dict<list<dict<string>>>, name: string): void
   call quickpick#close()
-  call system(mpc .. " add " .. shellescape(data["items"][0]["file"]))
+
+  call system(join([
+    mpc,
+    "add",
+    shellescape(data["items"][0]["file"]),
+  ], " "))
 enddef
